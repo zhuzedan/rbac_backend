@@ -1,29 +1,40 @@
 package org.zzd.pojo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.zzd.entity.SystemUser;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author :zzd
- * @date : 2023-02-26 16:10
+ * @apiNote :封装用户信息
+ * @date : 2023-03-02 10:55
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LoginUser implements UserDetails {
 
-public class LoginUser implements UserDetails{
-    private Long id;
-
-    private String username;
-
-    private String password;
+    private SystemUser user;
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUsername();
     }
 
     @Override

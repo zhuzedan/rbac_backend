@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.zzd.filter.JwtAuthenticationTokenFilter;
 import org.zzd.handler.AccessDeniedHandlerImpl;
 import org.zzd.handler.AuthenticationEntryPointImpl;
 
@@ -39,6 +40,9 @@ public class SecurityConfig {
     @Autowired
     private AuthenticationEntryPointImpl authenticationEntryPoint;
 
+    @Autowired
+    JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -52,18 +56,21 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 // 对于登录接口 允许匿名访问
-                .antMatchers("/api/user/login").anonymous()
+                .antMatchers("/api/systemUser/login").anonymous()
                 //配置swagger
                 .antMatchers(AUTH_WHITELIST).anonymous()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
         //允许跨域,关闭csrf
         http.cors().and().csrf().disable();
+        //把token校验过滤器添加到过滤器链中,放在其他过滤器之前
+        http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         //处理异常
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler);
         return http.build();
     }
-    // -- swagger ui忽略
+
+    // swagger ui忽略
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
@@ -71,6 +78,5 @@ public class SecurityConfig {
             "/webjars/**",
             "/doc.html",
     };
-
 
 }

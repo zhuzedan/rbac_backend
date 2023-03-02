@@ -22,9 +22,9 @@ import java.util.Objects;
  * 用户表(SystemUser)表控制层
  *
  * @author zzd
- * @since 2023-02-27 22:27:37
+ * @since 2023-03-02 13:53:39
  */
-@Api(tags = "")
+@Api(tags = "用户管理")
 @RestController
 @RequestMapping("/api/systemUser")
 public class SystemUserController {

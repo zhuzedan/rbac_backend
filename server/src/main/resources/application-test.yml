@@ -6,19 +6,19 @@ mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   global-config:
     db-config:
+      logic-delete-field: is_deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
-      id-type: auto
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/hfmall?characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/rbac?characterEncoding=utf-8&useSSL=false
     username: root
     password: root
     hikari:
       minimum-idle: 3
       maximum-pool-size: 10
-      max-lifetime: 30000   #不能小于30秒，否则默认回到1800秒
+      max-lifetime: 30000
       connection-test-query: SELECT 1
   mvc:
     pathmatch:
@@ -26,3 +26,7 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB

@@ -20,18 +20,19 @@ public class StartAndStop implements ApplicationRunner, DisposableBean {
     private String port;
 
     /**
-     * @apiNote: 项目启动时运行此方法
+     * @apiNote 运行时执行
+     * @date 2023/3/2 10:48
      */
     @Override
     public void run(ApplicationArguments args) {
         log.info("==============项目启动成功！==============");
-        log.info("请访问地址：http://{}:{}", ApiUtils.getHostIp(), port);
+        log.info("接口文档地址：http://{}:{}/doc.html", ApiUtils.getHostIp(), port);
         log.info("=======================================");
     }
 
     /**
-     * @apiNote: 项目关闭时执行
-     * @return: void
+     * @apiNote 关闭项目时执行
+     * @date 2023/3/2 10:49
      */
     @Override
     public void destroy() {

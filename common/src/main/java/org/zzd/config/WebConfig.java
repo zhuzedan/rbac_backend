@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // TODO 绝对路径改成你电脑上的
+        // TODO 本地上传文件的绝对路径
         registry.addResourceHandler("/image/**").addResourceLocations("file:D:\\projectByUniapp\\hfmall-app\\static\\image\\");
     }
 }

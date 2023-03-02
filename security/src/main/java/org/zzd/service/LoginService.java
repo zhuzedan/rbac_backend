@@ -1,12 +1,16 @@
 package org.zzd.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.zzd.pojo.LoginUser;
+import org.zzd.dto.LoginDto;
+import org.zzd.result.ResponseResult;
 
 /**
  * @author :zzd
- * @date : 2023-02-26 21:20
+ * @apiNote :用户表(SystemUser)表服务接口
+ * @date : 2023-03-02 13:26
  */
 public interface LoginService {
-    LoginUser findUserByUserName(String username);
+
+    ResponseResult login(LoginDto loginDto);
+
+    ResponseResult getInfo();
 }
