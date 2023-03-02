@@ -4,7 +4,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.zzd.annotation.Log;
 import org.zzd.dto.LoginDto;
+import org.zzd.enums.BusinessType;
+import org.zzd.enums.OperatorType;
 import org.zzd.result.ResponseResult;
 import org.zzd.service.LoginService;
 
@@ -27,6 +30,7 @@ public class LoginController {
     }
 
     //获取用户信息
+    @Log(title = "获取当前登录用户信息", businessType = BusinessType.SELECT, operatorType = OperatorType.MANAGE)
     @ApiOperation("用户信息")
     @GetMapping("/info")
     public ResponseResult getInfo() {
