@@ -2,6 +2,7 @@ package org.zzd.aspect;
 
 import com.alibaba.fastjson.JSON;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +34,22 @@ import java.util.Map;
 public class LogAspect {
     private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
 
+    //请求处理时间
+    ThreadLocal<Long> startTime = new ThreadLocal<>();
+
     @Resource
     private SystemOperationLogMapper systemOperationLogMapper;
 
+    @Pointcut("@annotation(org.zzd.annotation.Log)")
+    public void logPointcut() {
+
+    }
+
+    @Before("logPointcut()")
+    public void doBefore() {
+        // 记录请求开始时间
+        startTime.set(System.currentTimeMillis());
+    }
 
     /**
      * 处理完请求后执行
@@ -60,8 +74,6 @@ public class LogAspect {
 
     protected void handleLog(final JoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult) {
         try {
-
-            // *========数据库日志=========*//
             SystemOperationLog systemOperationLog = new SystemOperationLog();
             systemOperationLog.setStatus(1);
             // 请求的地址和url
@@ -83,6 +95,8 @@ public class LogAspect {
             systemOperationLog.setRequestMethod(request.getMethod());
             //时间
             systemOperationLog.setCreateTime(new Date());
+            //操作时间
+            systemOperationLog.setOperationTime(String.valueOf(System.currentTimeMillis()  - startTime.get() + "ms"));
             // 处理设置注解上的参数
             getControllerMethodDescription(joinPoint, controllerLog, systemOperationLog, jsonResult);
             // 保存数据库

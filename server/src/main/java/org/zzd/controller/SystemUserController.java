@@ -1,6 +1,9 @@
 package org.zzd.controller;
 
+import org.zzd.annotation.Log;
 import org.zzd.entity.SystemUser;
+import org.zzd.enums.BusinessType;
+import org.zzd.enums.OperatorType;
 import org.zzd.service.SystemUserService;
 import org.zzd.utils.PageHelper;
 import org.zzd.exception.ResponseException;
@@ -32,6 +35,7 @@ public class SystemUserController {
     @Autowired
     private SystemUserService systemUserService;
 
+    @Log(title = "分页查询用户", businessType = BusinessType.SELECT, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "分页查询")
     @PostMapping("/queryPage")
     @ApiImplicitParams({
@@ -44,6 +48,7 @@ public class SystemUserController {
         return systemUserService.queryPage(params);
     }
 
+    @Log(title = "用户详情", businessType = BusinessType.READ, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "获取详情")
     @GetMapping("/read")
     public ResponseResult selectOne(Integer id) {
@@ -56,8 +61,9 @@ public class SystemUserController {
         }
     }
 
+    @Log(title = "新增用户", businessType = BusinessType.INSERT, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "新增数据")
-    @PostMapping("/save")
+    @PostMapping("/insert")
     public ResponseResult insert(@RequestBody SystemUser systemUser) {
         boolean flag = systemUserService.save(systemUser);
         if (flag) {
@@ -67,6 +73,7 @@ public class SystemUserController {
         }
     }
 
+    @Log(title = "修改用户", businessType = BusinessType.UPDATE, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "修改数据")
     @PostMapping("/update")
     public ResponseResult update(@RequestBody SystemUser systemUser) {
@@ -74,6 +81,7 @@ public class SystemUserController {
         return ResponseResult.success();
     }
 
+    @Log(title = "删除用户", businessType = BusinessType.DELETE, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "删除数据")
     @DeleteMapping("delete")
     public ResponseResult delete(Long id) {
@@ -85,6 +93,8 @@ public class SystemUserController {
             throw new ResponseException(ResultCodeEnum.PARAM_NOT_VALID.getCode(), ResultCodeEnum.PARAM_NOT_VALID.getMessage());
         }
     }
+
+    @Log(title = "批量删除用户", businessType = BusinessType.DELETE, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "批量删除数据")
     @DeleteMapping("/batchRemove")
     public ResponseResult batchRemove(@RequestBody List<Long> idList) {
