@@ -1,6 +1,5 @@
 package org.zzd.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,21 +37,6 @@ public class LoginServiceImpl implements LoginService {
     SystemUserMapper systemUserMapper;
     @Resource
     private JwtTokenUtil jwtTokenUtil;
-
-    /**
-     * @apiNote 根据用户名查用户信息
-     * @date 2023/3/3 16:57
-     * @param username: 用户名
-     * @return org.zzd.entity.SystemUser
-     */
-    @Override
-    public SystemUser findUserByUsername(String username) {
-        //根据用户名查询用户信息
-        LambdaQueryWrapper<SystemUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SystemUser::getUsername,username);
-        //返回查询记录
-        return systemUserMapper.selectOne(wrapper);
-    }
 
     @Override
     public ResponseResult login(LoginDto loginDto) {
