@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.zzd.entity.SystemUser;
 import org.zzd.mapper.SystemUserMapper;
 import org.zzd.pojo.LoginUser;
+import org.zzd.service.LoginService;
 
 import java.util.Objects;
 
@@ -22,13 +23,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private SystemUserMapper systemUserMapper;
+    @Autowired
+    private LoginService loginService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        //根据用户名查询用户信息
-        LambdaQueryWrapper<SystemUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SystemUser::getUsername,username);
-        SystemUser systemUser = systemUserMapper.selectOne(wrapper);
+        SystemUser systemUser = loginService.findUserByUsername(username);
         //如果查询不到数据就通过抛出异常来给出提示
         if(Objects.isNull(systemUser)){
             throw new RuntimeException("用户名错误");

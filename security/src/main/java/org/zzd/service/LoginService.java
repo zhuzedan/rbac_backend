@@ -1,6 +1,7 @@
 package org.zzd.service;
 
 import org.zzd.dto.LoginDto;
+import org.zzd.entity.SystemUser;
 import org.zzd.result.ResponseResult;
 
 /**
@@ -9,6 +10,8 @@ import org.zzd.result.ResponseResult;
  * @date : 2023-03-02 13:26
  */
 public interface LoginService {
+
+    SystemUser findUserByUsername(String username);
 
     ResponseResult login(LoginDto loginDto);
 
