@@ -1,6 +1,8 @@
 package org.zzd.filter;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.jsonwebtoken.Claims;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -8,8 +10,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.entity.SystemUser;
+import org.zzd.mapper.SystemUserMapper;
 import org.zzd.utils.JwtTokenUtil;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +29,12 @@ import java.util.Objects;
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
+    @Resource
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private SystemUserMapper systemUserMapper;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //1获取token  header的token
@@ -39,25 +49,24 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             return;
         }
         //2解析token
-        String userId;
+        String username;
         try {
-            Claims claims = JwtTokenUtil.parseJWT(token);
-            userId = claims.getSubject();
-        } catch (Exception e) {
+            username = jwtTokenUtil.getUserNameFromToken(token);
+        }catch (Exception e) {
             throw new RuntimeException("token不合法！");
         }
 
-        //3获取userId
-        SystemUser securityLoginUser = new SystemUser();
-        securityLoginUser.setId(Long.valueOf(userId));
-        if (Objects.isNull(securityLoginUser)) {
+        //3获取username
+        SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
+        String name = systemUser.getUsername();
+        if (Objects.isNull(systemUser)) {
             throw new RuntimeException("当前用户未登录！");
         }
         //TODO 获取用户权限信息
 
         //4封装Authentication
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(securityLoginUser, null, null);
+                = new UsernamePasswordAuthenticationToken(name, null, null);
 
         //5存入SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);

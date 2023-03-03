@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.zzd.constant.SecurityConstants;
 
 import javax.crypto.SecretKey;
@@ -12,15 +13,14 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.*;
 
 
+
 /**
  * JWT工具类
  * @author :zzd
  * @date : 2022/11/4
  */
+@Component
 public class JwtTokenUtil {
-    private static final String CLAIM_KEY_USERNAME = "sub";
-    private static final String CLAIM_KEY_CREATED = "created";
-
 
     /**
      * ----根据用户信息生成token
@@ -29,22 +29,18 @@ public class JwtTokenUtil {
      */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
-        claims.put(CLAIM_KEY_CREATED, new Date());
+        claims.put(SecurityConstants.CLAIM_KEY_USERNAME, userDetails.getUsername());
         return generateToken(claims);
     }
 
-    /**
-     * 根据荷载生成token
-     *
-     * @param claims
-     * @return
-     */
+
     private String generateToken(Map<String, Object> claims) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         SecretKey secretKey = generalKey();
         return Jwts.builder()
                 .setClaims(claims)
+                .setIssuer("zzd")     // 签发者
+                .setIssuedAt(new Date(System.currentTimeMillis()))      // 签发时间
                 .setExpiration(generateExpirationDate())
                 .signWith(signatureAlgorithm, secretKey)
                 .compact();
@@ -55,7 +51,7 @@ public class JwtTokenUtil {
      * @return
      */
     private Date generateExpirationDate() {
-        return new Date(System.currentTimeMillis()+SecurityConstants.EXPIRATION_TIME);
+        return new Date(System.currentTimeMillis()+ SecurityConstants.EXPIRATION_TIME);
     }
 
     /**
@@ -146,7 +142,7 @@ public class JwtTokenUtil {
      */
     public String refreshToken(String token) {
         Claims claims = getClaimsFromToken(token);
-        claims.put(CLAIM_KEY_CREATED, new Date());
+        claims.put(SecurityConstants.CLAIM_KEY_CREATED, new Date());
         return generateToken(claims);
     }
 
@@ -154,57 +150,6 @@ public class JwtTokenUtil {
         String token = UUID.randomUUID().toString().replaceAll("-", "");
         return token;
     }
-
-    /**
-     * @apiNote 生成jwt
-     * @date 2023/3/2 10:06
-     * @param subject: 获取的id也用于解析
-     * @return java.lang.String
-     */
-    public static String createJWT(String subject) {
-        JwtBuilder builder = getJwtBuilder(subject, null, getUUID());// 设置过期时间
-        return builder.compact();
-    }
-
-    /**
-     * @apiNote 生成jwt
-     * @date 2023/3/2 10:08
-     * @param subject: token中要存放的数据（json格式）
-     * @param ttlMillis: token超时时间
-     * @return java.lang.String
-     */
-    public static String createJWT(String subject, Long ttlMillis) {
-        JwtBuilder builder = getJwtBuilder(subject, ttlMillis, getUUID());// 设置过期时间
-        return builder.compact();
-    }
-
-    private static JwtBuilder getJwtBuilder(String subject, Long ttlMillis, String uuid) {
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-        SecretKey secretKey = generalKey();
-        long nowMillis = System.currentTimeMillis();
-        Date now = new Date(nowMillis);
-        if(ttlMillis==null){
-            ttlMillis= SecurityConstants.EXPIRATION_TIME;
-        }
-        long expMillis = nowMillis + ttlMillis;
-        Date expDate = new Date(expMillis);
-        return Jwts.builder()
-                // payload
-                .setId(uuid)              //唯一的ID
-                .setSubject(subject)   // 主题  可以是JSON数据
-                .setIssuer("zzd")     // 签发者
-                .setIssuedAt(now)      // 签发时间
-                .setExpiration(expDate)   //时间
-                // signature
-                .signWith(signatureAlgorithm, secretKey); //使用HS256对称加密算法签名, 第二个参数为秘钥
-    }
-
-
-    public static String createJWT(String id, String subject, Long ttlMillis) {
-        JwtBuilder builder = getJwtBuilder(subject, ttlMillis, id);// 设置过期时间
-        return builder.compact();
-    }
-
 
     /**
      * @apiNote 生成加密后的密钥
@@ -217,17 +162,4 @@ public class JwtTokenUtil {
         return key;
     }
 
-    /**
-     * @apiNote 解析jwt
-     * @date 2023/3/2 10:10
-     * @param jwt: token
-     * @return io.jsonwebtoken.Claims
-     */
-    public static Claims parseJWT(String jwt) throws Exception {
-        SecretKey secretKey = generalKey();
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(jwt)
-                .getBody();
-    }
 }

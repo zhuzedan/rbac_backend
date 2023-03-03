@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.dto.LoginDto;
@@ -17,6 +18,8 @@ import org.zzd.result.ResponseResult;
 import org.zzd.result.ResultCodeEnum;
 import org.zzd.service.LoginService;
 import org.zzd.utils.JwtTokenUtil;
+
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +35,8 @@ public class LoginServiceImpl implements LoginService {
     AuthenticationManager authenticationManager;
     @Autowired
     SystemUserMapper systemUserMapper;
+    @Resource
+    private JwtTokenUtil jwtTokenUtil;
 
     @Override
     public ResponseResult login(LoginDto loginDto) {
@@ -45,9 +50,9 @@ public class LoginServiceImpl implements LoginService {
         //生成自己jwt给前端
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         String id = loginUser.getUser().getId().toString();
-        String jwt = JwtTokenUtil.createJWT(id);
+        String token = jwtTokenUtil.generateToken(loginUser);
         Map<String,String> map = new HashMap();
-        map.put("token",jwt);
+        map.put("token",token);
         map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);
 
         return ResponseResult.success("登录成功",map);
@@ -55,12 +60,15 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public ResponseResult getInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SystemUser loginUser = (SystemUser) authentication.getPrincipal();
-        SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("id", loginUser.getId()));
+        String username = getCurrentUsername();
+        SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
         systemUser.setPassword(null);
         Map<String,Object> map = new HashMap<>();
         map.put("userInfo",systemUser);
         return ResponseResult.success(map);
+    }
+
+    public String getCurrentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }
