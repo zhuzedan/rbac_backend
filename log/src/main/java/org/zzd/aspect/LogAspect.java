@@ -1,26 +1,18 @@
 package org.zzd.aspect;
 
 import com.alibaba.fastjson.JSON;
-import io.jsonwebtoken.Claims;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
-import org.aspectj.lang.reflect.CodeSignature;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.zzd.annotation.Log;
 import org.zzd.entity.SystemOperationLog;
-import org.zzd.service.SOLogService;
+import org.zzd.mapper.SystemOperationLogMapper;
 import org.zzd.utils.HttpContextUtils;
 import org.zzd.utils.IpUtil;
 
@@ -42,7 +34,8 @@ public class LogAspect {
     private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
 
     @Resource
-    private SOLogService systemOperationLogService;
+    private SystemOperationLogMapper systemOperationLogMapper;
+
 
     /**
      * 处理完请求后执行
@@ -93,7 +86,7 @@ public class LogAspect {
             // 处理设置注解上的参数
             getControllerMethodDescription(joinPoint, controllerLog, systemOperationLog, jsonResult);
             // 保存数据库
-            systemOperationLogService.saveSystemLog(systemOperationLog);
+            systemOperationLogMapper.insert(systemOperationLog);
 
         } catch (Exception exp) {
             // 记录本地异常日志
