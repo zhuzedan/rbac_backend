@@ -2,7 +2,6 @@ package org.zzd.aspect;
 
 import com.alibaba.fastjson.JSON;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,12 +75,10 @@ public class LogAspect {
         try {
             SystemOperationLog systemOperationLog = new SystemOperationLog();
             systemOperationLog.setStatus(1);
-            // 请求的地址和url
-            HttpServletRequest request = HttpContextUtils.getHttpServletRequest();
 
-            String ip = IpUtil.getIpAddress(request);
-            systemOperationLog.setOperationIp(ip);
-            systemOperationLog.setOperationUrl(request.getRequestURI());
+            HttpServletRequest request = HttpContextUtils.getHttpServletRequest();
+            systemOperationLog.setOperationIp(IpUtil.getIpAddress(request));   // 请求ip地址
+            systemOperationLog.setOperationUrl(request.getRequestURI());   // 请求url
 
             if (e != null) {
                 systemOperationLog.setStatus(0);
@@ -91,12 +88,12 @@ public class LogAspect {
             String className = joinPoint.getTarget().getClass().getName();
             String methodName = joinPoint.getSignature().getName();
             systemOperationLog.setMethod(className + "." + methodName + "()");
-            // 设置请求方式
+            // 设置请求方法类型
             systemOperationLog.setRequestMethod(request.getMethod());
             //时间
             systemOperationLog.setCreateTime(new Date());
             //操作时间
-            systemOperationLog.setOperationTime(String.valueOf(System.currentTimeMillis()  - startTime.get() + "ms"));
+            systemOperationLog.setOperationTime(System.currentTimeMillis()  - startTime.get() + "ms");
             // 处理设置注解上的参数
             getControllerMethodDescription(joinPoint, controllerLog, systemOperationLog, jsonResult);
             // 保存数据库

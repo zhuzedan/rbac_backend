@@ -17,6 +17,7 @@ import org.zzd.pojo.LoginUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.result.ResultCodeEnum;
 import org.zzd.service.LoginService;
+import org.zzd.utils.AuthUtils;
 import org.zzd.utils.JwtTokenUtil;
 
 import javax.annotation.Resource;
@@ -37,6 +38,8 @@ public class LoginServiceImpl implements LoginService {
     SystemUserMapper systemUserMapper;
     @Resource
     private JwtTokenUtil jwtTokenUtil;
+    @Resource
+    private AuthUtils authUtils;
 
     @Override
     public ResponseResult login(LoginDto loginDto) {
@@ -50,6 +53,7 @@ public class LoginServiceImpl implements LoginService {
         //生成自己jwt给前端
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         String id = loginUser.getUser().getId().toString();
+        String username = loginUser.getUser().getUsername();
         String token = jwtTokenUtil.generateToken(loginUser);
         Map<String,String> map = new HashMap();
         map.put("token",token);
@@ -60,7 +64,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public ResponseResult getInfo() {
-        String username = getCurrentUsername();
+        String username = authUtils.getCurrentUsername();
         SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
         systemUser.setPassword(null);
         Map<String,Object> map = new HashMap<>();
@@ -68,7 +72,5 @@ public class LoginServiceImpl implements LoginService {
         return ResponseResult.success(map);
     }
 
-    public String getCurrentUsername() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
-    }
+
 }
