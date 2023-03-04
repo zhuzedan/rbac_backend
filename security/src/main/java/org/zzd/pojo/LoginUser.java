@@ -1,13 +1,19 @@
 package org.zzd.pojo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.zzd.entity.SystemMenu;
 import org.zzd.entity.SystemUser;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author :zzd
@@ -21,10 +27,29 @@ public class LoginUser implements UserDetails {
 
     private SystemUser user;
 
+    List<String> permissions;
+
+    public LoginUser(SystemUser user, List<String> permissions) {
+        this.user = user;
+        this.permissions = permissions;
+    }
+
+    public LoginUser(SystemUser user) {
+        this.user = user;
+    }
+
+    @JSONField(serialize = false)
+    List<SimpleGrantedAuthority> authorities;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        if (authorities!=null){
+            return authorities;
+        }
+
+        authorities = permissions.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        return authorities;
     }
 
     @Override

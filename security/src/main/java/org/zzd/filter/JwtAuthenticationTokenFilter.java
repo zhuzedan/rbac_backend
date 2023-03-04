@@ -11,6 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.entity.SystemUser;
 import org.zzd.mapper.SystemUserMapper;
+import org.zzd.pojo.LoginUser;
 import org.zzd.utils.JwtTokenUtil;
 
 import javax.annotation.Resource;
@@ -62,11 +63,11 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         if (Objects.isNull(systemUser)) {
             throw new RuntimeException("当前用户未登录！");
         }
-        //TODO 获取用户权限信息
-
+        //获取用户权限信息
+        LoginUser loginUser = new LoginUser(systemUser);
         //4封装Authentication
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(name, null, null);
+                = new UsernamePasswordAuthenticationToken(name, null, loginUser.getAuthorities());
 
         //5存入SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
