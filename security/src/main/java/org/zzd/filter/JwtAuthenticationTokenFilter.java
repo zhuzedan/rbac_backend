@@ -13,6 +13,7 @@ import org.zzd.entity.SystemUser;
 import org.zzd.mapper.SystemUserMapper;
 import org.zzd.pojo.LoginUser;
 import org.zzd.utils.JwtTokenUtil;
+import org.zzd.utils.ThreadLocalUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.FilterChain;
@@ -65,9 +66,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         }
         //获取用户权限信息
         LoginUser loginUser = new LoginUser(systemUser);
+        ThreadLocalUtil.setUsername(loginUser.getUsername());
         //4封装Authentication
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(name, null, loginUser.getAuthorities());
+                = new UsernamePasswordAuthenticationToken(name, null, null);
 
         //5存入SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);

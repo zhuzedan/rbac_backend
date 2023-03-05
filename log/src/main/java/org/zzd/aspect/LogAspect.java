@@ -15,6 +15,7 @@ import org.zzd.entity.SystemOperationLog;
 import org.zzd.mapper.SystemOperationLogMapper;
 import org.zzd.utils.HttpContextUtils;
 import org.zzd.utils.IpUtil;
+import org.zzd.utils.ThreadLocalUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -92,6 +93,8 @@ public class LogAspect {
             systemOperationLog.setRequestMethod(request.getMethod());
             //时间
             systemOperationLog.setCreateTime(new Date());
+            //操作人
+            systemOperationLog.setOperationName(ThreadLocalUtil.getUsername());
             //操作时间
             systemOperationLog.setOperationTime(System.currentTimeMillis()  - startTime.get() + "ms");
             // 处理设置注解上的参数
