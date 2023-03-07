@@ -10,8 +10,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.entity.SystemUser;
+import org.zzd.exception.ResponseException;
 import org.zzd.mapper.SystemUserMapper;
 import org.zzd.pojo.LoginUser;
+import org.zzd.result.ResultCodeEnum;
 import org.zzd.utils.JwtTokenUtil;
 import org.zzd.utils.ThreadLocalUtil;
 
@@ -55,14 +57,14 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         try {
             username = jwtTokenUtil.getUserNameFromToken(token);
         }catch (Exception e) {
-            throw new RuntimeException("token不合法！");
+            throw new ResponseException(400, "token不合法");
         }
 
         //3获取username
         SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
         String name = systemUser.getUsername();
-        if (Objects.isNull(systemUser)) {
-            throw new RuntimeException("当前用户未登录！");
+        if (!StringUtils.hasText(name)) {
+            throw new ResponseException(ResultCodeEnum.LOGIN_AUTH.getCode(),ResultCodeEnum.LOGIN_AUTH.getMessage());
         }
         //获取用户权限信息
         LoginUser loginUser = new LoginUser(systemUser);

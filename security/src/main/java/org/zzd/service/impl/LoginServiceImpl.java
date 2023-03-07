@@ -42,14 +42,11 @@ public class LoginServiceImpl implements LoginService {
     private AuthUtils authUtils;
 
     @Override
-    public ResponseResult login(LoginDto loginDto) {
+    public ResponseResult login(LoginDto loginDto) throws ResponseException{
         //使用ProviderManager auth方法进行验证
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getUsername(),loginDto.getPassword());
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
-        //校验失败了
-        if(Objects.isNull(authenticate)){
-            throw new ResponseException(ResultCodeEnum.LOGIN_ERROR.getCode(), ResultCodeEnum.LOGIN_ERROR.getMessage());
-        }
+
         //生成自己jwt给前端
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         String id = loginUser.getUser().getId().toString();

@@ -16,6 +16,7 @@ import org.zzd.mapper.SystemOperationLogMapper;
 import org.zzd.utils.HttpContextUtils;
 import org.zzd.utils.IpUtil;
 import org.zzd.utils.ThreadLocalUtil;
+import org.zzd.utils.ThrowableUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -81,9 +82,11 @@ public class LogAspect {
             systemOperationLog.setOperationIp(IpUtil.getIpAddress(request));   // 请求ip地址
             systemOperationLog.setOperationUrl(request.getRequestURI());   // 请求url
 
+            //异常exception
             if (e != null) {
                 systemOperationLog.setStatus(0);
                 systemOperationLog.setErrorMsg(e.getMessage());
+                byte[] bytes = ThrowableUtil.getStackTrace(e).getBytes();
             }
             // 设置方法名称
             String className = joinPoint.getTarget().getClass().getName();

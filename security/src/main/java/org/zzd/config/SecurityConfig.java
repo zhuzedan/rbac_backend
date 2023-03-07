@@ -16,6 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.zzd.filter.JwtAuthenticationTokenFilter;
 import org.zzd.handler.AccessDeniedHandlerImpl;
 import org.zzd.handler.AuthenticationEntryPointImpl;
+import org.zzd.handler.LoginFailureHandler;
+
+import javax.annotation.Resource;
 
 /**
  * @author :zzd
@@ -43,6 +46,9 @@ public class SecurityConfig {
     @Autowired
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
+    @Resource
+    LoginFailureHandler loginFailureHandler;
+
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -51,12 +57,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .formLogin()
+                .failureHandler(loginFailureHandler)
+                .and()
                 //不通过Session获取SecurityContext
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
                 // 对于登录接口 允许匿名访问
                 .antMatchers("/api/systemUser/login").anonymous()
+
                 //配置swagger
                 .antMatchers(AUTH_WHITELIST).anonymous()
                 // 除上面外的所有请求全部需要鉴权认证
