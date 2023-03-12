@@ -17,6 +17,7 @@ import org.zzd.filter.JwtAuthenticationTokenFilter;
 import org.zzd.handler.AccessDeniedHandlerImpl;
 import org.zzd.handler.AuthenticationEntryPointImpl;
 import org.zzd.handler.LoginFailureHandler;
+import org.zzd.handler.LoginSuccessHandler;
 
 import javax.annotation.Resource;
 
@@ -47,6 +48,9 @@ public class SecurityConfig {
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
     @Resource
+    LoginSuccessHandler loginSuccessHandler;
+
+    @Resource
     LoginFailureHandler loginFailureHandler;
 
     @Bean
@@ -56,18 +60,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .formLogin()
-                .failureHandler(loginFailureHandler)
-                .and()
-                //不通过Session获取SecurityContext
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                // 对于登录接口 允许匿名访问
-                .antMatchers("/api/systemUser/login").anonymous()
-
-                //配置swagger
+        //登录登出配置
+        http.formLogin()
+                // .loginProcessingUrl("/api/systemUser/login")
+                // .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler);
+                // .and()
+                // .logout()
+                // .logoutSuccessHandler()
+        //不通过Session获取SecurityContext
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        // 拦截规则配置
+        http.authorizeRequests()
+                // 允许匿名访问的接口路径
                 .antMatchers(AUTH_WHITELIST).anonymous()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
@@ -80,8 +85,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // swagger ui忽略
+    // 放行白名单
     private static final String[] AUTH_WHITELIST = {
+            "/api/systemUser/login",
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/v2/api-docs",

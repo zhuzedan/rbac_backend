@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.dto.LoginDto;
@@ -15,7 +13,6 @@ import org.zzd.exception.ResponseException;
 import org.zzd.mapper.SystemUserMapper;
 import org.zzd.pojo.LoginUser;
 import org.zzd.result.ResponseResult;
-import org.zzd.result.ResultCodeEnum;
 import org.zzd.service.LoginService;
 import org.zzd.utils.AuthUtils;
 import org.zzd.utils.JwtTokenUtil;
@@ -23,7 +20,6 @@ import org.zzd.utils.JwtTokenUtil;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author :zzd

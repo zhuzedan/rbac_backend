@@ -23,7 +23,7 @@ import java.util.*;
 public class JwtTokenUtil {
 
     /**
-     * ----根据用户信息生成token
+     * 根据用户信息生成token
      * @param userDetails
      * @return
      */

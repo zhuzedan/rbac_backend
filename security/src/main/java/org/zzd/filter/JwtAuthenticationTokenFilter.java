@@ -27,7 +27,7 @@ import java.util.Objects;
 
 /**
  * @author :zzd
- * @apiNote :OncePerRequestFilter只走一次，在请求前
+ * @apiNote :OncePerRequestFilter保证过滤只执行一次，在请求前
  * @date : 2023-03-02 11:26
  */
 @Component

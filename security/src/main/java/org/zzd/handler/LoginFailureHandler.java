@@ -25,6 +25,9 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+        response.setContentType("application/json;charset=utf-8");
+        ServletOutputStream outputStream = response.getOutputStream();
+
         String message = null;//提示信息
         int code = 500;//错误编码
         //判断异常类型
@@ -45,6 +48,9 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         }
         //将错误信息转换成JSON
         String result = JSON.toJSONString(ResponseResult.error(code,message));
-        WebUtils.renderString(response,result);
+        outputStream.write(result.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+        outputStream.close();
+
     }
 }
