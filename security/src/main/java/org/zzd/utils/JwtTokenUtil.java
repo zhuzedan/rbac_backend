@@ -23,13 +23,14 @@ import java.util.*;
 public class JwtTokenUtil {
 
     /**
-     * 根据用户信息生成token
-     * @param userDetails
-     * @return
+     * @apiNote 根据用户名生成token
+     * @date 2023/3/12 21:28
+     * @param username: 用户名
+     * @return java.lang.String
      */
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(SecurityConstants.CLAIM_KEY_USERNAME, userDetails.getUsername());
+        claims.put(SecurityConstants.CLAIM_KEY_USERNAME, username);
         return generateToken(claims);
     }
 
@@ -47,18 +48,19 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 生成token失效时间
-     * @return
+     * @apiNote token失效时间
+     * @date 2023/3/12 21:28
+     * @return java.util.Date
      */
     private Date generateExpirationDate() {
         return new Date(System.currentTimeMillis()+ SecurityConstants.EXPIRATION_TIME);
     }
 
     /**
-     * ----从token中获取登录用户名
-     *
-     * @param token
-     * @return
+     * @apiNote 从token中获取用户名
+     * @date 2023/3/12 21:31
+     * @param token: token
+     * @return java.lang.String
      */
     public String getUserNameFromToken(String token) {
         String username;
@@ -71,11 +73,7 @@ public class JwtTokenUtil {
         return username;
     }
 
-    /**
-     * 从token中获取荷载
-     * @param token
-     * @return
-     */
+
     private Claims getClaimsFromToken(String token) {
         SecretKey secretKey = generalKey();
         Claims claims = null;
@@ -90,23 +88,17 @@ public class JwtTokenUtil {
         return claims;
     }
 
-    /**
-     * ----验证token是否有效
-     *
-     * @param token
-     * @param userDetails
-     * @return
-     */
+
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = getUserNameFromToken(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     /**
-     * 判断token是否失效
-     *
-     * @param token
-     * @return
+     * @apiNote 判断token是否有效
+     * @date 2023/3/12 21:32
+     * @param token: token
+     * @return boolean
      */
     private boolean isTokenExpired(String token) {
         Date expireDate = getExpiredDateFromToken(token);
@@ -114,31 +106,26 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 从token中获取过期时间
-     *
-     * @param token
-     * @return
+     * @apiNote 从token中获取过期时间
+     * @date 2023/3/12 21:30
+     * @param token: token
+     * @return java.util.Date
      */
     private Date getExpiredDateFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.getExpiration();
     }
 
-    /**
-     * ----判断token是否可以被刷新
-     *
-     * @param token
-     * @return
-     */
+
     public boolean canRefresh(String token) {
         return !isTokenExpired(token);
     }
 
     /**
-     * ----刷新token
-     *
-     * @param token
-     * @return
+     * @apiNote 刷新token
+     * @date 2023/3/12 21:30
+     * @param token: token
+     * @return java.lang.String
      */
     public String refreshToken(String token) {
         Claims claims = getClaimsFromToken(token);

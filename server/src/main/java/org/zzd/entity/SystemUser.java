@@ -38,7 +38,7 @@ public class SystemUser implements Serializable {
     //描述
     private String description;
     //状态1启用0禁用
-    private Boolean enabled;
+    private Integer status;
     //性别;1=男,2=女,3=未知
     private String gender;
     //生日

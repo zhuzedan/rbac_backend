@@ -19,9 +19,9 @@ import javax.annotation.Resource;
 
 /**
  * @author :zzd
- * @date : 2023-02-26 12:39
+ * @apiNote security配置
+ * @date 2023/3/12 21:22
  */
-
 public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {

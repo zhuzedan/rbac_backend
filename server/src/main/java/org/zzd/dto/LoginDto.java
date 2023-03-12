@@ -1,5 +1,10 @@
 package org.zzd.dto;
 
+/**
+ * @author :zzd
+ * @apiNote :登录对象
+ * @date : 2023-03-12 19:55
+ */
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

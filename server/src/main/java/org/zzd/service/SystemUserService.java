@@ -1,6 +1,8 @@
 package org.zzd.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.zzd.dto.LoginDto;
 import org.zzd.entity.SystemUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.utils.PageHelper;
@@ -14,7 +16,13 @@ import java.util.HashMap;
  * @since 2023-03-02 13:53:39
  */
 public interface SystemUserService extends IService<SystemUser> {
+    ResponseResult login(LoginDto loginDto);
+
+    ResponseResult getInfo();
+
     // 分页查询
     ResponseResult<PageHelper<SystemUser>> queryPage(HashMap params);
+
+    UserDetails loadUserByUsername(String username);
 }
 

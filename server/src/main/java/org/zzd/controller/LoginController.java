@@ -9,7 +9,7 @@ import org.zzd.dto.LoginDto;
 import org.zzd.enums.BusinessType;
 import org.zzd.enums.OperatorType;
 import org.zzd.result.ResponseResult;
-import org.zzd.service.LoginService;
+import org.zzd.service.SystemUserService;
 
 /**
  * @author :zzd
@@ -21,12 +21,12 @@ import org.zzd.service.LoginService;
 @RequestMapping("/api/systemUser")
 public class LoginController {
     @Autowired
-    LoginService loginService;
+    SystemUserService systemUserService;
     // 登录
     @ApiOperation("用户登录")
     @PostMapping("/login")
     public ResponseResult login(@RequestBody LoginDto loginDto) {
-        return loginService.login(loginDto);
+        return systemUserService.login(loginDto);
     }
 
     //获取用户信息
@@ -34,7 +34,7 @@ public class LoginController {
     @ApiOperation("用户信息")
     @GetMapping("/info")
     public ResponseResult getInfo() {
-        return loginService.getInfo();
+        return systemUserService.getInfo();
     }
 
     //用户退出登录

@@ -1,20 +1,37 @@
 package org.zzd.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zzd.constant.PageConstant;
+import org.zzd.constant.SecurityConstants;
+import org.zzd.dto.LoginDto;
+import org.zzd.exception.ResponseException;
+import org.zzd.mapper.SystemUserMapper;
+import org.zzd.pojo.SecuritySystemUser;
 import org.zzd.result.ResponseResult;
+import org.zzd.result.ResultCodeEnum;
+import org.zzd.utils.AuthUtils;
+import org.zzd.utils.JwtTokenUtil;
 import org.zzd.utils.PageHelper;
 import org.zzd.entity.SystemUser;
 import org.zzd.service.SystemUserService;
-import org.zzd.mapper.SystemUserMapper;
 
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 用户表(SystemUser)表服务实现类
@@ -24,6 +41,73 @@ import java.util.HashMap;
  */
 @Service("systemUserService")
 public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemUser> implements SystemUserService {
+    @Resource
+    private AuthUtils authUtils;
+
+    @Autowired
+    private SystemUserMapper systemUserMapper;
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    @Resource
+    private JwtTokenUtil jwtTokenUtil;
+
+
+    /**
+     * @apiNote 后台用户登录
+     * @date 2023/3/12 21:21
+     * @param loginDto: 登录参数
+     * @return org.zzd.result.ResponseResult
+     */
+    @Override
+    public ResponseResult login(LoginDto loginDto) throws ResponseException{
+        SystemUser login = doLogin(loginDto.getUsername(),loginDto.getPassword());
+
+        String token = jwtTokenUtil.generateToken(login.getUsername());
+        Map<String,String> map = new HashMap();
+        map.put("token",token);
+        map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);
+
+        return ResponseResult.success("登录成功",map);
+    }
+
+    public SystemUser doLogin(String username, String password) {
+
+        SystemUser systemUser;
+        UserDetails userDetails;
+        try {
+            userDetails = loadUserByUsername(username);
+            systemUser = ((SecuritySystemUser)userDetails).getSystemUser();
+        } catch (Exception e) {
+            throw new ResponseException(ResultCodeEnum.LOGIN_ERROR.getCode(), ResultCodeEnum.LOGIN_ERROR.getMessage());
+        }
+        if (!passwordEncoder.matches(password,systemUser.getPassword())) {
+            throw new ResponseException(ResultCodeEnum.PASSWORD_ERROR.getCode(),ResultCodeEnum.PASSWORD_ERROR.getMessage());
+        }
+        if(!userDetails.isEnabled()){
+            throw new ResponseException(ResultCodeEnum.ACCOUNT_STOP.getCode(),ResultCodeEnum.ACCOUNT_STOP.getMessage());
+        }
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        return systemUser;
+    }
+
+    /**
+     * @apiNote 获取用户信息
+     * @date 2023/3/12 21:21
+     * @return org.zzd.result.ResponseResult
+     */
+    @Override
+    public ResponseResult getInfo() {
+        String username = authUtils.getCurrentUsername();
+        SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
+        systemUser.setPassword(null);
+        Map<String,Object> map = new HashMap<>();
+        map.put("userInfo",systemUser);
+        return ResponseResult.success(map);
+    }
 
     @Override
     public ResponseResult<PageHelper<SystemUser>> queryPage(HashMap params) {
@@ -43,6 +127,26 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
 
         IPage<SystemUser> iPage = this.page(page, lambdaQueryWrapper);
         return ResponseResult.success(PageHelper.restPage(iPage));
+    }
+
+    /**
+     * @apiNote 获得当前用户
+     * @date 2023/3/12 19:03
+     * @return org.zzd.entity.SystemUser
+     */
+    public SystemUser getSystemUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecuritySystemUser systemUser = (SecuritySystemUser) authentication.getPrincipal();
+        return systemUser.getSystemUser();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
+        if (systemUser != null) {
+            return new SecuritySystemUser(systemUser);
+        }
+        throw new ResponseException(500,"用户名或密码错误");
     }
 }
 
