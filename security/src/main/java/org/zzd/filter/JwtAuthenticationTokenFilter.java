@@ -64,7 +64,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
         String name = systemUser.getUsername();
         if (!StringUtils.hasText(name)) {
-            throw new ResponseException(ResultCodeEnum.LOGIN_AUTH.getCode(),ResultCodeEnum.LOGIN_AUTH.getMessage());
+            throw new ResponseException(ResultCodeEnum.USER_NOT_LOGIN.getCode(),ResultCodeEnum.USER_NOT_LOGIN.getMessage());
         }
         //获取用户权限信息
         LoginUser loginUser = new LoginUser(systemUser);

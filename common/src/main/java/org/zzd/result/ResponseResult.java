@@ -62,6 +62,13 @@ public class ResponseResult<T> {
         result.setMessage(ResultCodeEnum.FAIL.getMessage());
         return result;
     }
+    public static <T> ResponseResult<T> error(String message) {
+        ResponseResult<T> result = new ResponseResult<>();
+        result.setSuccess(false);
+        result.setCode(ResultCodeEnum.FAIL.getCode());
+        result.setMessage(message);
+        return result;
+    }
     public static <T> ResponseResult<T> error(Integer code,String message) {
         ResponseResult<T> result = new ResponseResult<>();
         result.setSuccess(false);

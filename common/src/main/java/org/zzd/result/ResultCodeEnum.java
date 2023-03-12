@@ -12,8 +12,8 @@ public enum ResultCodeEnum implements CustomizeResultCode{
     REPEAT_SUBMIT(206, "重复提交"),
     ARGUMENT_VALID_ERROR(210, "参数校验异常"),
 
-    LOGIN_AUTH(208, "未登陆"),
-    PERMISSION(209, "没有权限"),
+    UNAUTHORIZED(401, "未登录或登录认证失败，请重新登录"),
+    FORBIDDEN(403, "权限不足"),
     NO_USERNAME(213, "用户名未填写"),
     ACCOUNT_ERROR(214, "账号不正确"),
     PASSWORD_ERROR(215, "密码不正确"),
@@ -36,10 +36,8 @@ public enum ResultCodeEnum implements CustomizeResultCode{
     USER_ACCOUNT_LOCKED(2006, "账号被锁定"),
     USER_ACCOUNT_NOT_EXIST(2007, "账号不存在"),
     USER_ACCOUNT_ALREADY_EXIST(2008, "账号已存在"),
-    USER_ACCOUNT_USE_BY_OTHERS(2009, "账号下线"),
-
-    /* 业务错误 */
-    NO_PERMISSION(3001, "没有权限");
+    USER_ACCOUNT_USE_BY_OTHERS(2009, "账号下线")
+    ;
 
     private Integer code;
     private String message;

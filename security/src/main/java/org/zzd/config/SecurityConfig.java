@@ -2,12 +2,9 @@ package org.zzd.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +14,6 @@ import org.zzd.filter.JwtAuthenticationTokenFilter;
 import org.zzd.handler.AccessDeniedHandlerImpl;
 import org.zzd.handler.AuthenticationEntryPointImpl;
 import org.zzd.handler.LoginFailureHandler;
-import org.zzd.handler.LoginSuccessHandler;
 
 import javax.annotation.Resource;
 
@@ -26,9 +22,6 @@ import javax.annotation.Resource;
  * @date : 2023-02-26 12:39
  */
 
-@EnableWebSecurity
-@Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,9 +41,6 @@ public class SecurityConfig {
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
     @Resource
-    LoginSuccessHandler loginSuccessHandler;
-
-    @Resource
     LoginFailureHandler loginFailureHandler;
 
     @Bean
@@ -60,14 +50,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        //登录登出配置
         http.formLogin()
-                // .loginProcessingUrl("/api/systemUser/login")
-                // .successHandler(loginSuccessHandler)
                 .failureHandler(loginFailureHandler);
-                // .and()
-                // .logout()
-                // .logoutSuccessHandler()
         //不通过Session获取SecurityContext
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // 拦截规则配置
