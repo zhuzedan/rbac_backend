@@ -10,13 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zzd.constant.PageConstant;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.dto.LoginDto;
+import org.zzd.entity.SystemMenu;
 import org.zzd.exception.ResponseException;
+import org.zzd.mapper.SystemMenuMapper;
 import org.zzd.mapper.SystemUserMapper;
 import org.zzd.pojo.SecuritySystemUser;
 import org.zzd.result.ResponseResult;
@@ -30,8 +34,12 @@ import org.zzd.service.SystemUserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.naming.NameNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 用户表(SystemUser)表服务实现类
@@ -46,6 +54,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
 
     @Autowired
     private SystemUserMapper systemUserMapper;
+    @Autowired
+    private SystemMenuMapper systemMenuMapper;
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -101,7 +111,7 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
      */
     @Override
     public ResponseResult getInfo() {
-        String username = authUtils.getCurrentUsername();
+        String username = AuthUtils.getCurrentUsername();
         SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
         systemUser.setPassword(null);
         Map<String,Object> map = new HashMap<>();
@@ -143,10 +153,16 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     @Override
     public UserDetails loadUserByUsername(String username) {
         SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
-        if (systemUser != null) {
-            return new SecuritySystemUser(systemUser);
-        }
-        throw new ResponseException(500,"用户名或密码错误");
+
+        //获取菜单列表
+        List<SystemMenu> menuList = systemMenuMapper.getSystemUserMenuList(systemUser.getId());
+        //获取权限集合
+        List<String> perms = menuList.stream().filter(Objects::nonNull).map(SystemMenu::getPerms).filter(Objects::nonNull).collect(Collectors.toList());
+        String[] authoritiesArray = perms.toArray(new String[perms.size()]);
+        List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(authoritiesArray);
+
+        return new SecuritySystemUser(systemUser,menuList,authorities);
+
     }
 }
 

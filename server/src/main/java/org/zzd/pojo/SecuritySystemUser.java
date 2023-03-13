@@ -1,13 +1,16 @@
 package org.zzd.pojo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.zzd.entity.SystemMenu;
 import org.zzd.entity.SystemUser;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author :zzd
@@ -21,9 +24,16 @@ public class SecuritySystemUser implements UserDetails {
 
     private SystemUser systemUser;
 
+    //用户菜单列表
+    @TableField(exist = false)
+    private List<SystemMenu> menus;
+
+    //用户权限列表
+    List<GrantedAuthority> authorities;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return authorities;
     }
 
     @Override
