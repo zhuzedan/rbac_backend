@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.zzd.annotation.Log;
+import org.zzd.annotation.LoginLog;
 import org.zzd.dto.LoginDto;
 import org.zzd.enums.BusinessType;
 import org.zzd.enums.OperatorType;
@@ -23,6 +24,7 @@ public class LoginController {
     @Autowired
     SystemUserService systemUserService;
     // 登录
+    @LoginLog
     @ApiOperation("用户登录")
     @PostMapping("/login")
     public ResponseResult login(@RequestBody LoginDto loginDto) {

@@ -14,7 +14,7 @@ public class AuthUtils {
      * @date 2023/3/3 21:57
      * @return java.lang.String
      */
-    public String getCurrentUsername() {
+    public static String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
     public static Long getUserId() {

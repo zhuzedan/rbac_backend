@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>org.zzd</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>security</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
