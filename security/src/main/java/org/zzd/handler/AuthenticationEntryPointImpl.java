@@ -6,6 +6,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.zzd.result.ResponseResult;
+import org.zzd.result.ResultCodeEnum;
 import org.zzd.utils.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +22,7 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
         //给前端ResponseResult 的json
-        ResponseResult responseResult = ResponseResult.error(HttpStatus.UNAUTHORIZED.value(), "登陆认证失败了，请重新登陆！");
+        ResponseResult responseResult = ResponseResult.error(ResultCodeEnum.UNAUTHORIZED.getCode(),ResultCodeEnum.UNAUTHORIZED.getMessage());
         String json = JSON.toJSONString(responseResult);
         WebUtils.renderString(response,json);
     }

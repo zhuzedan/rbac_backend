@@ -1,5 +1,6 @@
 package org.zzd.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.zzd.annotation.Log;
 import org.zzd.entity.SystemUser;
 import org.zzd.enums.BusinessType;
@@ -38,6 +39,7 @@ public class SystemUserController {
     @Log(title = "分页查询用户", businessType = BusinessType.SELECT, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "分页查询")
     @PostMapping("/queryPage")
+    @PreAuthorize("hasAuthority('bnt.sysUser.list')")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前页", paramType = "query", dataType = "integer",defaultValue = "1"),
             @ApiImplicitParam(name = "pageSize", value = "页面大小", paramType = "query", dataType = "integer",defaultValue = "10"),

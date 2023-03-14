@@ -13,9 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.zzd.filter.JwtAuthenticationTokenFilter;
 import org.zzd.handler.AccessDeniedHandlerImpl;
 import org.zzd.handler.AuthenticationEntryPointImpl;
-import org.zzd.handler.LoginFailureHandler;
-
-import javax.annotation.Resource;
 
 /**
  * @author :zzd
@@ -40,9 +37,6 @@ public class SecurityConfig {
     @Autowired
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-    @Resource
-    LoginFailureHandler loginFailureHandler;
-
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -50,8 +44,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.formLogin()
-                .failureHandler(loginFailureHandler);
         //不通过Session获取SecurityContext
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // 拦截规则配置

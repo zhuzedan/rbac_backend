@@ -12,7 +12,7 @@ public enum ResultCodeEnum implements CustomizeResultCode{
     REPEAT_SUBMIT(206, "重复提交"),
     ARGUMENT_VALID_ERROR(210, "参数校验异常"),
 
-    UNAUTHORIZED(401, "未登录或登录认证失败，请重新登录"),
+    UNAUTHORIZED(401, "登录认证失败，请重新登录"),
     FORBIDDEN(403, "权限不足"),
 
     NO_USERNAME(213, "用户名未填写"),

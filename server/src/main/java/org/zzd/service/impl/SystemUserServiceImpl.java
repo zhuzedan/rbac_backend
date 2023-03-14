@@ -164,7 +164,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
                 .collect(Collectors.toList());
         String[] authoritiesArray = perms.toArray(new String[perms.size()]);
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(authoritiesArray);
-
+        SecuritySystemUser securitySystemUser = new SecuritySystemUser(systemUser,menuList,authorities);
+        System.out.println(securitySystemUser);
         return new SecuritySystemUser(systemUser,menuList,authorities);
 
     }
