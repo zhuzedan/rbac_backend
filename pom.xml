@@ -12,7 +12,6 @@
         <module>security</module>
         <module>common</module>
         <module>server</module>
-        <module>database</module>
         <module>log</module>
     </modules>
 

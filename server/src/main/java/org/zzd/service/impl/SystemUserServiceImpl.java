@@ -157,7 +157,11 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         //获取菜单列表
         List<SystemMenu> menuList = systemMenuMapper.getSystemUserMenuList(systemUser.getId());
         //获取权限集合
-        List<String> perms = menuList.stream().filter(Objects::nonNull).map(SystemMenu::getPerms).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> perms = menuList.stream()
+                .filter(Objects::nonNull)
+                .map(SystemMenu::getPerms)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
         String[] authoritiesArray = perms.toArray(new String[perms.size()]);
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(authoritiesArray);
 
