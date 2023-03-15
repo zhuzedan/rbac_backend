@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zzd.constant.PageConstant;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.dto.LoginDto;
+import org.zzd.dto.UserInfoDto;
 import org.zzd.entity.SystemMenu;
 import org.zzd.exception.ResponseException;
 import org.zzd.mapper.SystemMenuMapper;
@@ -111,12 +112,13 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
      */
     @Override
     public ResponseResult getInfo() {
-        String username = AuthUtils.getCurrentUsername();
-        SystemUser systemUser = systemUserMapper.selectOne(new QueryWrapper<SystemUser>().eq("username", username));
-        systemUser.setPassword(null);
-        Map<String,Object> map = new HashMap<>();
-        map.put("userInfo",systemUser);
-        return ResponseResult.success(map);
+        SecuritySystemUser systemSecurityUser = getCurrentSecuritySystemUser();
+        SystemUser systemUser = systemSecurityUser.getSystemUser();
+        List<SystemMenu> menus = systemSecurityUser.getMenus();
+        //获取角色权限编码字段
+        Object[] perms = menus.stream().filter(Objects::nonNull).map(SystemMenu::getPerms).filter(StringUtils::isNotBlank).toArray();
+        UserInfoDto userInfoDto = new UserInfoDto(systemUser.getId(),systemUser.getNickname(),systemUser.getAvatar(),systemUser.getDescription(),perms);
+        return ResponseResult.success(userInfoDto);
     }
 
     @Override
@@ -140,12 +142,28 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     }
 
     /**
+     * @apiNote 获得当前的带detail的用户
+     * @date 2023/3/15 10:51
+     * @return org.zzd.pojo.SecuritySystemUser
+     */
+    public SecuritySystemUser getCurrentSecuritySystemUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new ResponseException(500,"用户信息查询失败");
+        }
+        return (SecuritySystemUser) authentication.getPrincipal();
+    }
+
+    /**
      * @apiNote 获得当前用户
      * @date 2023/3/12 19:03
      * @return org.zzd.entity.SystemUser
      */
-    public SystemUser getSystemUser() {
+    public SystemUser getCurrentSystemUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new ResponseException(500,"用户信息查询失败");
+        }
         SecuritySystemUser systemUser = (SecuritySystemUser) authentication.getPrincipal();
         return systemUser.getSystemUser();
     }
@@ -164,8 +182,6 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
                 .collect(Collectors.toList());
         String[] authoritiesArray = perms.toArray(new String[perms.size()]);
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(authoritiesArray);
-        SecuritySystemUser securitySystemUser = new SecuritySystemUser(systemUser,menuList,authorities);
-        System.out.println(securitySystemUser);
         return new SecuritySystemUser(systemUser,menuList,authorities);
 
     }
