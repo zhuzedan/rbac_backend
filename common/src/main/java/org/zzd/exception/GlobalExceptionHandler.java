@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zzd.result.ResponseResult;
 
-import java.io.IOException;
-import java.nio.file.AccessDeniedException;
-
 /**
  * 全局异常处理类
  *
@@ -22,34 +19,30 @@ public class GlobalExceptionHandler {
     /**
      * @apiNote 全局异常
      * @date 2023/3/14 21:53
-     * @param e: 异常
+     * @param ex: 异常
      * @return org.zzd.result.ResponseResult
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseResult error(Exception e){
-        e.printStackTrace();
-        System.out.println(e.getMessage());
-
+    public ResponseResult error(Exception ex) throws Exception {
+        //针对于捕捉不到AccessDeniedHandler的情况，直接向上抛出
+        if ("不允许访问".equals(ex.getMessage())) {
+            throw ex;
+        }
         return ResponseResult.error();
     }
 
     /**
      * @apiNote 指定异常
      * @date 2023/3/14 21:53
-     * @param e: 异常
+     * @param ex: 异常
      * @return org.zzd.result.ResponseResult
      */
     @ExceptionHandler(ResponseException.class)
     @ResponseBody
-    public ResponseResult error(ResponseException e) {
-        e.printStackTrace();
-        return ResponseResult.error(e.getCode(), e.getMessage());
+    public ResponseResult error(ResponseException ex) {
+        ex.printStackTrace();
+        return ResponseResult.error(ex.getCode(), ex.getMessage());
     }
 
-    @ExceptionHandler(value = AccessDeniedException.class)
-    @ResponseBody
-    public void accessDeniedException(AccessDeniedException e) throws IOException {
-        throw e;
-    }
 }
