@@ -35,14 +35,14 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //1获取token  header的token
+        //获取token  header的token
         String token = null;
         String bearerToken = request.getHeader(SecurityConstants.HEADER_STRING);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX,"");
         }
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            //2解析token
+            //解析token
             String username;
             try {
                 username = jwtTokenUtil.getUserNameFromToken(token);
