@@ -3,6 +3,7 @@ package org.zzd.entity;
 import java.util.Date;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -55,6 +56,12 @@ public class SystemMenu implements Serializable {
     private Integer isDeleted;
     //授权路径
     private String url;
+    // 下级列表
+    @TableField(exist = false)
+    private List<SystemMenu> children;
+    //是否选中
+    @TableField(exist = false)
+    private boolean isSelect;
 
 }
 
