@@ -15,27 +15,27 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.zzd.constant.PageConstant;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.dto.LoginDto;
 import org.zzd.dto.UserInfoDto;
 import org.zzd.entity.SystemMenu;
+import org.zzd.entity.SystemUser;
 import org.zzd.exception.ResponseException;
 import org.zzd.mapper.SystemMenuMapper;
 import org.zzd.mapper.SystemUserMapper;
 import org.zzd.pojo.SecuritySystemUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.result.ResultCodeEnum;
+import org.zzd.service.SystemUserService;
 import org.zzd.utils.AuthUtils;
 import org.zzd.utils.JwtTokenUtil;
 import org.zzd.utils.PageHelper;
-import org.zzd.entity.SystemUser;
-import org.zzd.service.SystemUserService;
-
-import org.springframework.stereotype.Service;
+import org.zzd.vo.TokenVo;
 
 import javax.annotation.Resource;
-import javax.naming.NameNotFoundException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +76,10 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         SystemUser login = doLogin(loginDto.getUsername(),loginDto.getPassword());
         SecuritySystemUser user = new SecuritySystemUser(login);
         String token = jwtTokenUtil.generateToken(user);
-        Map<String,String> map = new HashMap();
+        Map<String,Object> map = new HashMap();
         map.put("token",token);
         map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);
-
+        map.put("expireTime",jwtTokenUtil.getExpiredDateFromToken(token).getTime());
         return ResponseResult.success("登录成功",map);
     }
 
@@ -184,6 +184,23 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(authoritiesArray);
         return new SecuritySystemUser(systemUser,menuList,authorities);
 
+    }
+
+    @Override
+    public ResponseResult refreshToken(HttpServletRequest request) {
+        String token = null;
+        String bearerToken = request.getHeader(SecurityConstants.HEADER_STRING);
+        if (StringUtils.contains(bearerToken,SecurityConstants.TOKEN_PREFIX) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX,"");
+        }
+        SecuritySystemUser systemSecurityUser = getCurrentSecuritySystemUser();
+        String reToken = "";
+        if (jwtTokenUtil.validateToken(token,systemSecurityUser)) {
+            reToken = jwtTokenUtil.refreshToken(token);
+        }
+        Long expireTime = jwtTokenUtil.getExpiredDateFromToken(reToken).getTime();
+        TokenVo tokenVo = new TokenVo(expireTime,reToken);
+        return ResponseResult.success(tokenVo);
     }
 }
 

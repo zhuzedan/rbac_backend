@@ -31,20 +31,17 @@ public class JwtTokenUtil {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(SecurityConstants.CLAIM_KEY_USERNAME, userDetails.getUsername());
-        // claims.put(SecurityConstants.CLAIM_KEY_CREATED, new Date());
+        claims.put(SecurityConstants.CLAIM_KEY_CREATED, new Date());
         return generateToken(claims);
     }
 
 
     private String generateToken(Map<String, Object> claims) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-        SecretKey secretKey = generalKey();
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuer("zzd")     // 签发者
-                .setIssuedAt(new Date(System.currentTimeMillis()))      // 签发时间
                 .setExpiration(generateExpirationDate())   //过期时间
-                .signWith(signatureAlgorithm, secretKey)
+                .signWith(signatureAlgorithm, generalKey())
                 .compact();
     }
 
@@ -75,11 +72,10 @@ public class JwtTokenUtil {
     }
 
     private Claims getClaimsFromToken(String token) {
-        SecretKey secretKey = generalKey();
         Claims claims = null;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(generalKey())
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -88,14 +84,20 @@ public class JwtTokenUtil {
         return claims;
     }
 
-
-    public boolean validateToken(String token, UserDetails userDetails) {
+    /**
+     * @apiNote 验证令牌
+     * @date 2023/3/24 10:34
+     * @param token: 令牌
+     * @param userDetails: 用户
+     * @return java.lang.Boolean
+     */
+    public Boolean validateToken(String token, UserDetails userDetails) {
         String username = getUserNameFromToken(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     /**
-     * @apiNote 判断token是否有效
+     * @apiNote 判断token是否过期
      * @date 2023/3/12 21:32
      * @param token: token
      * @return boolean
@@ -111,7 +113,7 @@ public class JwtTokenUtil {
      * @param token: token
      * @return java.util.Date
      */
-    private Date getExpiredDateFromToken(String token) {
+    public Date getExpiredDateFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.getExpiration();
     }

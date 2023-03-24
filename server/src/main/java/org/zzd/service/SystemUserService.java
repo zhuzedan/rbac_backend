@@ -7,6 +7,7 @@ import org.zzd.entity.SystemUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.utils.PageHelper;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 
 /**
@@ -24,5 +25,8 @@ public interface SystemUserService extends IService<SystemUser> {
     ResponseResult<PageHelper<SystemUser>> queryPage(HashMap params);
 
     UserDetails loadUserByUsername(String username);
+
+    ResponseResult refreshToken(HttpServletRequest request);
+
 }
 

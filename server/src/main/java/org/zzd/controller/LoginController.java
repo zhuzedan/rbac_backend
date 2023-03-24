@@ -12,6 +12,8 @@ import org.zzd.enums.OperatorType;
 import org.zzd.result.ResponseResult;
 import org.zzd.service.SystemUserService;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author :zzd
  * @apiNote :用户登录接口
@@ -44,6 +46,12 @@ public class LoginController {
     @PostMapping("/logout")
     public ResponseResult logout() {
         return ResponseResult.success();
+    }
+
+    @ApiOperation("刷新token")
+    @PostMapping("/refreshToken")
+    public ResponseResult refreshToken(HttpServletRequest request) {
+        return systemUserService.refreshToken(request);
     }
 
 }
