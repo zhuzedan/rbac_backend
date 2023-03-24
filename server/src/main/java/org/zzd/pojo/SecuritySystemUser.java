@@ -25,12 +25,12 @@ public class SecuritySystemUser implements UserDetails {
     private SystemUser systemUser;
 
     //用户菜单列表
+
     @TableField(exist = false)
     private List<SystemMenu> menus;
-
     //用户权限列表
-    List<GrantedAuthority> authorities;
 
+    List<GrantedAuthority> authorities;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -64,5 +64,9 @@ public class SecuritySystemUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return systemUser.getStatus()==1;
+    }
+
+    public SecuritySystemUser(SystemUser systemUser) {
+        this.systemUser = systemUser;
     }
 }

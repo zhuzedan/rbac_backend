@@ -11,7 +11,7 @@ public class SecurityConstants {
     public static final String TOKEN_PREFIX = "Bearer";
     public static final String HEADER_STRING = "Authorization";
 
-    public static final String CLAIM_KEY_ID = "userId";
+    public static final String CLAIM_KEY_ID = "id";
     public static final String CLAIM_KEY_USERNAME = "sub";
     public static final String CLAIM_KEY_CREATED = "created";
 }

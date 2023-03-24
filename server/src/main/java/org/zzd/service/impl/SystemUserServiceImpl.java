@@ -74,8 +74,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     @Override
     public ResponseResult login(LoginDto loginDto) throws ResponseException{
         SystemUser login = doLogin(loginDto.getUsername(),loginDto.getPassword());
-
-        String token = jwtTokenUtil.generateToken(login.getUsername());
+        SecuritySystemUser user = new SecuritySystemUser(login);
+        String token = jwtTokenUtil.generateToken(user);
         Map<String,String> map = new HashMap();
         map.put("token",token);
         map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);

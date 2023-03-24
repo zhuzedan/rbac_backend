@@ -25,12 +25,13 @@ public class JwtTokenUtil {
     /**
      * @apiNote 根据用户名生成token
      * @date 2023/3/12 21:28
-     * @param username: 用户名
+     * @param userDetails: userDetails
      * @return java.lang.String
      */
-    public String generateToken(String username) {
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(SecurityConstants.CLAIM_KEY_USERNAME, username);
+        claims.put(SecurityConstants.CLAIM_KEY_USERNAME, userDetails.getUsername());
+        // claims.put(SecurityConstants.CLAIM_KEY_CREATED, new Date());
         return generateToken(claims);
     }
 
@@ -42,7 +43,7 @@ public class JwtTokenUtil {
                 .setClaims(claims)
                 .setIssuer("zzd")     // 签发者
                 .setIssuedAt(new Date(System.currentTimeMillis()))      // 签发时间
-                .setExpiration(generateExpirationDate())
+                .setExpiration(generateExpirationDate())   //过期时间
                 .signWith(signatureAlgorithm, secretKey)
                 .compact();
     }
@@ -72,7 +73,6 @@ public class JwtTokenUtil {
         }
         return username;
     }
-
 
     private Claims getClaimsFromToken(String token) {
         SecretKey secretKey = generalKey();
