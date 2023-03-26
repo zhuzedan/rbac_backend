@@ -1,7 +1,6 @@
 package org.zzd.utils;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,6 +35,11 @@ public class JwtTokenUtil {
     }
 
 
+    /**
+     * @apiNote 根据载荷生成token
+     * @param claims: 载荷
+     * @return java.lang.String
+     */
     private String generateToken(Map<String, Object> claims) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         return Jwts.builder()

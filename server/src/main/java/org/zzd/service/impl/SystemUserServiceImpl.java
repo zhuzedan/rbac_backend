@@ -29,9 +29,7 @@ import org.zzd.pojo.SecuritySystemUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.result.ResultCodeEnum;
 import org.zzd.service.SystemUserService;
-import org.zzd.utils.AuthUtils;
-import org.zzd.utils.JwtTokenUtil;
-import org.zzd.utils.PageHelper;
+import org.zzd.utils.*;
 import org.zzd.vo.TokenVo;
 
 import javax.annotation.Resource;
@@ -61,6 +59,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     AuthenticationManager authenticationManager;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    RedisCache redisCache;
     @Resource
     private JwtTokenUtil jwtTokenUtil;
 
@@ -80,6 +80,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         map.put("token",token);
         map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);
         map.put("expireTime",jwtTokenUtil.getExpiredDateFromToken(token).getTime());
+        //token值存入redis
+        redisCache.setCacheObject("token_",token);
         return ResponseResult.success("登录成功",map);
     }
 
@@ -191,7 +193,7 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         String token = null;
         String bearerToken = request.getHeader(SecurityConstants.HEADER_STRING);
         if (StringUtils.contains(bearerToken,SecurityConstants.TOKEN_PREFIX) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX,"");
+            token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX+" ","");
         }
         SecuritySystemUser systemSecurityUser = getCurrentSecuritySystemUser();
         String reToken = "";
@@ -200,6 +202,7 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         }
         Long expireTime = jwtTokenUtil.getExpiredDateFromToken(reToken).getTime();
         TokenVo tokenVo = new TokenVo(expireTime,reToken);
+        redisCache.setCacheObject("token_",reToken);
         return ResponseResult.success(tokenVo);
     }
 }

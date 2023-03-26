@@ -1,16 +1,17 @@
 package org.zzd.filter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.exception.ResponseException;
 import org.zzd.utils.JwtTokenUtil;
+import org.zzd.utils.RedisCache;
 
 import javax.annotation.Resource;
 import javax.servlet.FilterChain;
@@ -29,7 +30,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Resource
     private JwtTokenUtil jwtTokenUtil;
-
+    @Autowired
+    private RedisCache redisCache;
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -38,10 +40,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         //获取token  header的token
         String token = null;
         String bearerToken = request.getHeader(SecurityConstants.HEADER_STRING);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX,"");
+        if (!StringUtils.isBlank(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX+" ","");
         }
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+        if (!StringUtils.isBlank(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             //解析token
             String username;
             try {
@@ -49,7 +51,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             }catch (Exception e) {
                 throw new ResponseException(400, "token不合法");
             }
-
+            String frontToken = redisCache.getCacheObject("token_");
+            if (!frontToken.equals(token)) {
+                throw new ResponseException(500,"token验证失败");
+            }
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (userDetails != null) {
                 //封装Authentication
