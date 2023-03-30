@@ -61,8 +61,6 @@ public class LoginLogAspect {
         systemLoginLog.setIpaddr(ApiUtils.getHostIp());
         //用户名
         systemLoginLog.setUsername(AuthUtils.getCurrentUsername());
-        //创建时间
-        systemLoginLog.setCreateTime(new Date());
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(jsonResult));
         String code = jsonObject.getString("code");
         if ("200".equals(code)) {

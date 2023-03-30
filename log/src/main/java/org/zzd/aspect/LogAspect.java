@@ -13,13 +13,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.zzd.annotation.Log;
 import org.zzd.entity.SystemOperationLog;
 import org.zzd.mapper.SystemOperationLogMapper;
-import org.zzd.utils.*;
+import org.zzd.utils.AuthUtils;
+import org.zzd.utils.HttpContextUtils;
+import org.zzd.utils.IpUtil;
+import org.zzd.utils.ThrowableUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -50,9 +52,10 @@ public class LogAspect {
     }
 
     /**
-     * 处理完请求后执行
-     *
-     * @param joinPoint 切点
+     * @param joinPoint:     切点
+     * @param controllerLog: 日志注解
+     * @param jsonResult:    返回的json结果
+     * @apiNote 处理完请求后执行
      */
     @AfterReturning(pointcut = "@annotation(controllerLog)", returning = "jsonResult")
     public void doAfterReturning(JoinPoint joinPoint, Log controllerLog, Object jsonResult) {
@@ -60,10 +63,10 @@ public class LogAspect {
     }
 
     /**
-     * 拦截异常操作
-     *
-     * @param joinPoint 切点
-     * @param e         异常
+     * @param joinPoint:     切点
+     * @param controllerLog: 日志注解
+     * @param e:             异常
+     * @apiNote 拦截异常操作
      */
     @AfterThrowing(value = "@annotation(controllerLog)", throwing = "e")
     public void doAfterThrowing(JoinPoint joinPoint, Log controllerLog, Exception e) {
@@ -91,12 +94,10 @@ public class LogAspect {
             systemOperationLog.setMethod(className + "." + methodName + "()");
             // 设置请求方法类型
             systemOperationLog.setRequestMethod(request.getMethod());
-            //时间
-            systemOperationLog.setCreateTime(new Date());
             //操作人
             systemOperationLog.setOperationName(AuthUtils.getCurrentUsername());
             //操作时间
-            systemOperationLog.setOperationTime(System.currentTimeMillis()  - startTime.get() + "ms");
+            systemOperationLog.setOperationTime(System.currentTimeMillis() - startTime.get() + "ms");
             // 处理设置注解上的参数
             getControllerMethodDescription(joinPoint, controllerLog, systemOperationLog, jsonResult);
             // 保存数据库
@@ -111,13 +112,14 @@ public class LogAspect {
     }
 
     /**
-     * 获取注解中对方法的描述信息 用于Controller层注解
-     *
-     * @param log     日志
-     * @param operationLog 操作日志
-     * @throws Exception
+     * @param joinPoint:    切点
+     * @param log:          日志
+     * @param operationLog: 操作日志
+     * @param jsonResult:   json结果
+     * @return void
+     * @apiNote 获取注解中对方法的描述信息 用于Controller层注解
      */
-    public void getControllerMethodDescription(JoinPoint joinPoint, Log log, SystemOperationLog operationLog, Object jsonResult) throws Exception {
+    public void getControllerMethodDescription(JoinPoint joinPoint, Log log, SystemOperationLog operationLog, Object jsonResult) {
         // 设置action动作
         operationLog.setBusinessType(log.businessType().name());
         // 设置标题
@@ -135,13 +137,7 @@ public class LogAspect {
         }
     }
 
-    /**
-     * 获取请求的参数，放到log中
-     *
-     * @param operLog 操作日志
-     * @throws Exception 异常
-     */
-    private void setRequestValue(JoinPoint joinPoint, SystemOperationLog operLog) throws Exception {
+    private void setRequestValue(JoinPoint joinPoint, SystemOperationLog operLog) {
         String requestMethod = operLog.getRequestMethod();
         if (HttpMethod.PUT.name().equals(requestMethod) || HttpMethod.POST.name().equals(requestMethod)) {
             String params = argsArrayToString(joinPoint.getArgs());
@@ -150,29 +146,29 @@ public class LogAspect {
     }
 
     /**
-     * 参数拼装
+     * @apiNote 参数拼装
      */
     private String argsArrayToString(Object[] paramsArray) {
-        String params = "";
+        StringBuilder params = new StringBuilder();
         if (paramsArray != null && paramsArray.length > 0) {
             for (Object o : paramsArray) {
                 if (!StringUtils.isEmpty(o) && !isFilterObject(o)) {
                     try {
                         Object jsonObj = JSON.toJSON(o);
-                        params += jsonObj.toString() + " ";
+                        params.append(jsonObj.toString()).append(" ");
                     } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
-        return params.trim();
+        return params.toString().trim();
     }
 
     /**
-     * 判断是否需要过滤的对象。
-     *
-     * @param o 对象信息。
-     * @return 如果是需要过滤的对象，则返回true；否则返回false。
+     * @param o: 对象信息
+     * @return boolean如果是需要过滤的对象，则返回true；否则返回false。
+     * @apiNote 判断是否需要过滤的对象
      */
     @SuppressWarnings("rawtypes")
     public boolean isFilterObject(final Object o) {
