@@ -69,6 +69,7 @@ public class SecurityConfig {
             "/v2/api-docs",
             "/webjars/**",
             "/doc.html",
+            "/api/wechat/login"
     };
 
 }

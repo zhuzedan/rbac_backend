@@ -61,5 +61,7 @@ public class SystemUser implements Serializable {
     private Integer userType;
     //创建人
     private String createBy;
+    //是否是移动端用户
+    private Integer ifWxUser;
 
 }
