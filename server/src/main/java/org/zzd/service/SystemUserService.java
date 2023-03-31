@@ -2,8 +2,9 @@ package org.zzd.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.zzd.dto.LoginDto;
+import org.zzd.dto.user.LoginDto;
 import org.zzd.dto.user.CreateUserDto;
+import org.zzd.dto.user.LoginCaptchaDto;
 import org.zzd.entity.SystemUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.utils.PageHelper;
@@ -19,6 +20,8 @@ import java.util.HashMap;
  */
 public interface SystemUserService extends IService<SystemUser> {
     ResponseResult login(LoginDto loginDto);
+
+    ResponseResult loginCaptcha(LoginCaptchaDto loginCaptchaDto, HttpServletRequest request);
 
     ResponseResult getInfo();
 

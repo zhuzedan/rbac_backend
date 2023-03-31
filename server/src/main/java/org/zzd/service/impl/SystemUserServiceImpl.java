@@ -18,9 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.zzd.constant.PageConstant;
 import org.zzd.constant.SecurityConstants;
-import org.zzd.dto.LoginDto;
-import org.zzd.dto.UserInfoDto;
+import org.zzd.dto.user.LoginDto;
+import org.zzd.dto.user.UserInfoDto;
 import org.zzd.dto.user.CreateUserDto;
+import org.zzd.dto.user.LoginCaptchaDto;
 import org.zzd.entity.SystemMenu;
 import org.zzd.entity.SystemUser;
 import org.zzd.exception.ResponseException;
@@ -49,9 +50,6 @@ import java.util.stream.Collectors;
  */
 @Service("systemUserService")
 public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemUser> implements SystemUserService {
-    @Resource
-    private AuthUtils authUtils;
-
     @Autowired
     private SystemUserMapper systemUserMapper;
     @Autowired
@@ -65,25 +63,18 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     @Resource
     private JwtTokenUtil jwtTokenUtil;
 
-
-    /**
-     * @apiNote 后台用户登录
-     * @date 2023/3/12 21:21
-     * @param loginDto: 登录参数
-     * @return org.zzd.result.ResponseResult
-     */
     @Override
-    public ResponseResult login(LoginDto loginDto) throws ResponseException{
-        SystemUser login = doLogin(loginDto.getUsername(),loginDto.getPassword());
+    public ResponseResult login(LoginDto loginDto) throws ResponseException {
+        SystemUser login = doLogin(loginDto.getUsername(), loginDto.getPassword());
         SecuritySystemUser user = new SecuritySystemUser(login);
         String token = jwtTokenUtil.generateToken(user);
-        Map<String,Object> map = new HashMap();
-        map.put("token",token);
+        Map<String, Object> map = new HashMap();
+        map.put("token", token);
         map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);
-        map.put("expireTime",jwtTokenUtil.getExpiredDateFromToken(token).getTime());
+        map.put("expireTime", jwtTokenUtil.getExpiredDateFromToken(token).getTime());
         //token值存入redis
-        redisCache.setCacheObject("token_",token);
-        return ResponseResult.success("登录成功",map);
+        redisCache.setCacheObject("token_", token);
+        return ResponseResult.success("登录成功", map);
     }
 
     public SystemUser doLogin(String username, String password) {
@@ -92,15 +83,54 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         UserDetails userDetails;
         try {
             userDetails = loadUserByUsername(username);
-            systemUser = ((SecuritySystemUser)userDetails).getSystemUser();
+            systemUser = ((SecuritySystemUser) userDetails).getSystemUser();
         } catch (Exception e) {
             throw new ResponseException(ResultCodeEnum.LOGIN_ERROR.getCode(), ResultCodeEnum.LOGIN_ERROR.getMessage());
         }
-        if (!passwordEncoder.matches(password,systemUser.getPassword())) {
-            throw new ResponseException(ResultCodeEnum.PASSWORD_ERROR.getCode(),ResultCodeEnum.PASSWORD_ERROR.getMessage());
+        if (!passwordEncoder.matches(password, systemUser.getPassword())) {
+            throw new ResponseException(ResultCodeEnum.PASSWORD_ERROR.getCode(), ResultCodeEnum.PASSWORD_ERROR.getMessage());
         }
-        if(!userDetails.isEnabled()){
-            throw new ResponseException(ResultCodeEnum.ACCOUNT_STOP.getCode(),ResultCodeEnum.ACCOUNT_STOP.getMessage());
+        if (!userDetails.isEnabled()) {
+            throw new ResponseException(ResultCodeEnum.ACCOUNT_STOP.getCode(), ResultCodeEnum.ACCOUNT_STOP.getMessage());
+        }
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        return systemUser;
+    }
+
+    @Override
+    public ResponseResult loginCaptcha(LoginCaptchaDto loginCaptchaDto, HttpServletRequest request) {
+        SystemUser login = doCaptchaLogin(loginCaptchaDto, request);
+        SecuritySystemUser user = new SecuritySystemUser(login);
+        String token = jwtTokenUtil.generateToken(user);
+        Map<String, Object> map = new HashMap();
+        map.put("token", token);
+        map.put("tokenHead", SecurityConstants.TOKEN_PREFIX);
+        map.put("expireTime", jwtTokenUtil.getExpiredDateFromToken(token).getTime());
+        //token值存入redis
+        redisCache.setCacheObject("token_", token);
+        return ResponseResult.success("登录成功", map);
+    }
+
+    public SystemUser doCaptchaLogin(LoginCaptchaDto loginCaptchaDto, HttpServletRequest request) {
+        SystemUser systemUser;
+        UserDetails userDetails;
+        String captcha = (String) request.getSession().getAttribute("captcha");
+        if (null == captcha || !captcha.equals(loginCaptchaDto.getCaptcha())) {
+            throw new ResponseException(ResultCodeEnum.REPEAT_SUBMIT.getCode(), "验证码不正确");
+        }
+        try {
+            userDetails = loadUserByUsername(loginCaptchaDto.getUsername());
+            systemUser = ((SecuritySystemUser) userDetails).getSystemUser();
+        } catch (Exception e) {
+            throw new ResponseException(ResultCodeEnum.LOGIN_ERROR.getCode(), ResultCodeEnum.LOGIN_ERROR.getMessage());
+        }
+        if (!passwordEncoder.matches(loginCaptchaDto.getPassword(), systemUser.getPassword())) {
+            throw new ResponseException(ResultCodeEnum.PASSWORD_ERROR.getCode(), ResultCodeEnum.PASSWORD_ERROR.getMessage());
+        }
+        if (!userDetails.isEnabled()) {
+            throw new ResponseException(ResultCodeEnum.ACCOUNT_STOP.getCode(), ResultCodeEnum.ACCOUNT_STOP.getMessage());
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -109,9 +139,9 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     }
 
     /**
+     * @return org.zzd.result.ResponseResult
      * @apiNote 获取用户信息
      * @date 2023/3/12 21:21
-     * @return org.zzd.result.ResponseResult
      */
     @Override
     public ResponseResult getInfo() {
@@ -120,7 +150,7 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         List<SystemMenu> menus = systemSecurityUser.getMenus();
         //获取角色权限编码字段
         Object[] perms = menus.stream().filter(Objects::nonNull).map(SystemMenu::getPerms).filter(StringUtils::isNotBlank).toArray();
-        UserInfoDto userInfoDto = new UserInfoDto(systemUser.getId(),systemUser.getNickname(),systemUser.getAvatar(),systemUser.getDescription(),perms);
+        UserInfoDto userInfoDto = new UserInfoDto(systemUser.getId(), systemUser.getNickname(), systemUser.getAvatar(), systemUser.getDescription(), perms);
         return ResponseResult.success(userInfoDto);
     }
 
@@ -132,12 +162,12 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
 
         LambdaQueryWrapper<SystemUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         // 起始日期
-        if(!StringUtils.isBlank((CharSequence) params.get("startDate"))){
-            lambdaQueryWrapper.ge(SystemUser::getCreateTime,params.get("startDate"));
+        if (!StringUtils.isBlank((CharSequence) params.get("startDate"))) {
+            lambdaQueryWrapper.ge(SystemUser::getCreateTime, params.get("startDate"));
         }
         // 结束日期
-        if(!StringUtils.isBlank((CharSequence) params.get("endDate"))){
-            lambdaQueryWrapper.le(SystemUser::getCreateTime,params.get("endDate"));
+        if (!StringUtils.isBlank((CharSequence) params.get("endDate"))) {
+            lambdaQueryWrapper.le(SystemUser::getCreateTime, params.get("endDate"));
         }
 
         IPage<SystemUser> iPage = this.page(page, lambdaQueryWrapper);
@@ -145,9 +175,9 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     }
 
     /**
-     * @apiNote 新建用户
      * @param createUserDto: 新建用户的对象
      * @return org.zzd.result.ResponseResult
+     * @apiNote 新建用户
      */
     @Override
     public ResponseResult insertSystemUser(CreateUserDto createUserDto) {
@@ -155,8 +185,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
             throw new ResponseException(ResultCodeEnum.PARAM_IS_BLANK.getCode(), "登录名不能为空");
         }
         Long count = systemUserMapper.selectCount(new QueryWrapper<SystemUser>().eq("username", createUserDto.getUsername()));
-        if (count>0) {
-            throw new ResponseException(500,"用户已存在");
+        if (count > 0) {
+            throw new ResponseException(500, "用户已存在");
         }
         SystemUser systemUser = SystemUser.insertUserConvert(createUserDto);
         if (!StringUtils.isBlank(systemUser.getPassword())) {
@@ -169,27 +199,27 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     }
 
     /**
+     * @return org.zzd.pojo.SecuritySystemUser
      * @apiNote 获得当前的带detail的用户
      * @date 2023/3/15 10:51
-     * @return org.zzd.pojo.SecuritySystemUser
      */
     public SecuritySystemUser getCurrentSecuritySystemUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            throw new ResponseException(500,"用户信息查询失败");
+            throw new ResponseException(500, "用户信息查询失败");
         }
         return (SecuritySystemUser) authentication.getPrincipal();
     }
 
     /**
+     * @return org.zzd.entity.SystemUser
      * @apiNote 获得当前用户
      * @date 2023/3/12 19:03
-     * @return org.zzd.entity.SystemUser
      */
     public SystemUser getCurrentSystemUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            throw new ResponseException(500,"用户信息查询失败");
+            throw new ResponseException(500, "用户信息查询失败");
         }
         SecuritySystemUser systemUser = (SecuritySystemUser) authentication.getPrincipal();
         return systemUser.getSystemUser();
@@ -209,7 +239,7 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
                 .collect(Collectors.toList());
         String[] authoritiesArray = perms.toArray(new String[perms.size()]);
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(authoritiesArray);
-        return new SecuritySystemUser(systemUser,menuList,authorities);
+        return new SecuritySystemUser(systemUser, menuList, authorities);
 
     }
 
@@ -217,17 +247,17 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     public ResponseResult refreshToken(HttpServletRequest request) {
         String token = null;
         String bearerToken = request.getHeader(SecurityConstants.HEADER_STRING);
-        if (StringUtils.contains(bearerToken,SecurityConstants.TOKEN_PREFIX) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            token =  bearerToken.replace(SecurityConstants.TOKEN_PREFIX+" ","");
+        if (StringUtils.contains(bearerToken, SecurityConstants.TOKEN_PREFIX) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            token = bearerToken.replace(SecurityConstants.TOKEN_PREFIX + " ", "");
         }
         SecuritySystemUser systemSecurityUser = getCurrentSecuritySystemUser();
         String reToken = "";
-        if (jwtTokenUtil.validateToken(token,systemSecurityUser)) {
+        if (jwtTokenUtil.validateToken(token, systemSecurityUser)) {
             reToken = jwtTokenUtil.refreshToken(token);
         }
         Long expireTime = jwtTokenUtil.getExpiredDateFromToken(reToken).getTime();
-        TokenVo tokenVo = new TokenVo(expireTime,reToken);
-        redisCache.setCacheObject("token_",reToken);
+        TokenVo tokenVo = new TokenVo(expireTime, reToken);
+        redisCache.setCacheObject("token_", reToken);
         return ResponseResult.success(tokenVo);
     }
 }

@@ -1,4 +1,4 @@
-package org.zzd.dto;
+package org.zzd.dto.user;
 
 /**
  * @author :zzd

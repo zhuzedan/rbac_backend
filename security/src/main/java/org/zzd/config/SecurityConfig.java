@@ -64,6 +64,8 @@ public class SecurityConfig {
     // 放行白名单
     private static final String[] AUTH_WHITELIST = {
             "/api/systemUser/login",
+            "/api/systemUser/loginCaptcha",
+            "/api/systemUser/captcha",
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/v2/api-docs",
