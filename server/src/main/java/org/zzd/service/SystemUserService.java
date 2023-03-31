@@ -3,6 +3,7 @@ package org.zzd.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.zzd.dto.LoginDto;
+import org.zzd.dto.user.CreateUserDto;
 import org.zzd.entity.SystemUser;
 import org.zzd.result.ResponseResult;
 import org.zzd.utils.PageHelper;
@@ -28,5 +29,6 @@ public interface SystemUserService extends IService<SystemUser> {
 
     ResponseResult refreshToken(HttpServletRequest request);
 
+    ResponseResult insertSystemUser(CreateUserDto createUserDto);
 }
 

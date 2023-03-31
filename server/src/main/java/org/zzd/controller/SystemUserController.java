@@ -2,6 +2,7 @@ package org.zzd.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.zzd.annotation.Log;
+import org.zzd.dto.user.CreateUserDto;
 import org.zzd.entity.SystemUser;
 import org.zzd.enums.BusinessType;
 import org.zzd.enums.OperatorType;
@@ -43,8 +44,8 @@ public class SystemUserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前页", paramType = "query", dataType = "integer",defaultValue = "1"),
             @ApiImplicitParam(name = "pageSize", value = "页面大小", paramType = "query", dataType = "integer",defaultValue = "10"),
-            @ApiImplicitParam(name = "startCreateTime", value = "起始日期", paramType = "query", dataType = "date"),
-            @ApiImplicitParam(name = "endCreateTime", value = "结束日期", paramType = "query", dataType = "date")
+            @ApiImplicitParam(name = "startDate", value = "起始日期", paramType = "query", dataType = "date"),
+            @ApiImplicitParam(name = "endDate", value = "结束日期", paramType = "query", dataType = "date")
     })
     public ResponseResult<PageHelper<SystemUser>> queryPage(@ApiIgnore @RequestParam HashMap params) {
         return systemUserService.queryPage(params);
@@ -65,14 +66,9 @@ public class SystemUserController {
 
     @Log(title = "新增用户", businessType = BusinessType.INSERT, operatorType = OperatorType.MANAGE)
     @ApiOperation(value = "新增数据")
-    @PostMapping("/insert")
-    public ResponseResult insert(@RequestBody SystemUser systemUser) {
-        boolean flag = systemUserService.save(systemUser);
-        if (flag) {
-            return ResponseResult.success();
-        }else {
-            throw new ResponseException(ResultCodeEnum.DATA_ERROR.getCode(), ResultCodeEnum.DATA_ERROR.getMessage());
-        }
+    @PostMapping("/insertSystemUser")
+    public ResponseResult insert(@RequestBody CreateUserDto createUserDto) {
+        return systemUserService.insertSystemUser(createUserDto);
     }
 
     @Log(title = "修改用户", businessType = BusinessType.UPDATE, operatorType = OperatorType.MANAGE)

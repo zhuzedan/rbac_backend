@@ -20,6 +20,7 @@ import org.zzd.constant.PageConstant;
 import org.zzd.constant.SecurityConstants;
 import org.zzd.dto.LoginDto;
 import org.zzd.dto.UserInfoDto;
+import org.zzd.dto.user.CreateUserDto;
 import org.zzd.entity.SystemMenu;
 import org.zzd.entity.SystemUser;
 import org.zzd.exception.ResponseException;
@@ -131,16 +132,40 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
 
         LambdaQueryWrapper<SystemUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         // 起始日期
-        if(!StringUtils.isBlank((CharSequence) params.get("startCreateTime"))){
-            lambdaQueryWrapper.ge(SystemUser::getCreateTime,params.get("startCreateTime"));
+        if(!StringUtils.isBlank((CharSequence) params.get("startDate"))){
+            lambdaQueryWrapper.ge(SystemUser::getCreateTime,params.get("startDate"));
         }
         // 结束日期
-        if(!StringUtils.isBlank((CharSequence) params.get("endCreateTime"))){
-            lambdaQueryWrapper.le(SystemUser::getCreateTime,params.get("endCreateTime"));
+        if(!StringUtils.isBlank((CharSequence) params.get("endDate"))){
+            lambdaQueryWrapper.le(SystemUser::getCreateTime,params.get("endDate"));
         }
 
         IPage<SystemUser> iPage = this.page(page, lambdaQueryWrapper);
         return ResponseResult.success(PageHelper.restPage(iPage));
+    }
+
+    /**
+     * @apiNote 新建用户
+     * @param createUserDto: 新建用户的对象
+     * @return org.zzd.result.ResponseResult
+     */
+    @Override
+    public ResponseResult insertSystemUser(CreateUserDto createUserDto) {
+        if (StringUtils.isBlank(createUserDto.getUsername())) {
+            throw new ResponseException(ResultCodeEnum.PARAM_IS_BLANK.getCode(), "登录名不能为空");
+        }
+        Long count = systemUserMapper.selectCount(new QueryWrapper<SystemUser>().eq("username", createUserDto.getUsername()));
+        if (count>0) {
+            throw new ResponseException(500,"用户已存在");
+        }
+        SystemUser systemUser = SystemUser.insertUserConvert(createUserDto);
+        if (!StringUtils.isBlank(systemUser.getPassword())) {
+            systemUser.setPassword(passwordEncoder.encode(systemUser.getPassword()));
+        }
+        //创建人
+        systemUser.setCreateBy(getCurrentSystemUser().getUsername());
+        systemUserMapper.insert(systemUser);
+        return ResponseResult.success();
     }
 
     /**
@@ -206,4 +231,3 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         return ResponseResult.success(tokenVo);
     }
 }
-
