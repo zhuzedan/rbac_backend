@@ -1,0 +1,49 @@
+Manifest-Version: 1.0
+Main-Class: org.zzd.RbacStartApplication
+Class-Path: plexus-utils-1.5.8.jar spring-boot-starter-2.7.5.jar mybatis
+ -spring-2.0.6.jar jakarta.annotation-api-1.3.5.jar antlr4-runtime-4.7.2
+ .jar commons-codec-1.15.jar spring-plugin-core-2.0.0.RELEASE.jar jul-to
+ -slf4j-1.7.36.jar spring-data-redis-2.7.5.jar netty-transport-4.1.84.Fi
+ nal.jar spring-expression-5.3.23.jar knife4j-spring-ui-2.0.9.jar mybati
+ s-plus-core-3.5.1.jar spring-beans-5.3.23.jar netty-handler-4.1.84.Fina
+ l.jar commons-lang3-3.12.0.jar spring-boot-starter-security-2.7.5.jar t
+ omlj-1.0.0.jar tomcat-embed-core-9.0.68.jar swagger-annotations-1.6.0.j
+ ar reactor-core-3.4.24.jar slf4j-api-1.7.36.jar springfox-schema-2.10.5
+ .jar classmate-1.5.1.jar spring-boot-starter-data-redis-2.7.5.jar jjwt-
+ 0.9.1.jar spring-aop-5.3.23.jar mybatis-3.5.9.jar spring-core-5.3.23.ja
+ r spring-boot-starter-tomcat-2.7.5.jar spring-boot-loader-tools-2.7.5.j
+ ar jackson-datatype-jdk8-2.13.4.jar spring-plugin-metadata-2.0.0.RELEAS
+ E.jar hutool-all-5.7.17.jar logback-core-1.2.11.jar jackson-annotations
+ -2.13.4.jar spring-boot-starter-logging-2.7.5.jar byte-buddy-1.12.18.ja
+ r mybatis-plus-3.5.1.jar knife4j-spring-boot-starter-2.0.9.jar netty-co
+ dec-4.1.84.Final.jar log4j-api-2.17.2.jar spring-boot-starter-json-2.7.
+ 5.jar knife4j-core-2.0.9.jar spring-data-commons-2.7.5.jar jsqlparser-4
+ .3.jar plexus-build-api-0.0.7.jar springfox-spi-2.10.5.jar spring-secur
+ ity-core-5.7.4.jar mybatis-plus-boot-starter-3.5.1.jar netty-buffer-4.1
+ .84.Final.jar jackson-module-parameter-names-2.13.4.jar spring-web-5.3.
+ 23.jar jackson-core-2.13.4.jar fastjson-1.2.83.jar spring-boot-2.7.5.ja
+ r spring-jdbc-5.3.23.jar jackson-datatype-jsr310-2.13.4.jar tomcat-embe
+ d-websocket-9.0.68.jar spring-boot-starter-aop-2.7.5.jar lettuce-core-6
+ .1.10.RELEASE.jar spring-security-web-5.7.4.jar spring-jcl-5.3.23.jar s
+ pring-data-keyvalue-2.7.5.jar httpclient-4.5.13.jar mybatis-plus-extens
+ ion-3.5.1.jar spring-boot-maven-plugin-2.7.5.jar logback-classic-1.2.11
+ .jar spring-test-5.3.23.jar HikariCP-4.0.3.jar httpcore-4.4.15.jar spri
+ ngfox-swagger2-2.10.5.jar knife4j-annotations-2.0.9.jar easy-captcha-1.
+ 6.2.jar netty-common-4.1.84.Final.jar jsr305-3.0.2.jar swagger-models-1
+ .6.0.jar spring-tx-5.3.23.jar log4j-to-slf4j-2.17.2.jar spring-webmvc-5
+ .3.23.jar spring-boot-autoconfigure-2.7.5.jar spring-context-5.3.23.jar
+  netty-transport-native-unix-common-4.1.84.Final.jar protobuf-java-3.19
+ .4.jar springfox-spring-webmvc-2.10.5.jar spring-security-config-5.7.4.
+ jar springfox-swagger-common-2.10.5.jar springfox-bean-validators-2.10.
+ 5.jar jna-5.7.0.jar netty-resolver-4.1.84.Final.jar spring-boot-starter
+ -jdbc-2.7.5.jar mysql-connector-java-8.0.29.jar springfox-spring-web-2.
+ 10.5.jar javassist-3.25.0-GA.jar springfox-core-2.10.5.jar spring-secur
+ ity-crypto-5.7.4.jar commons-compress-1.21.jar snakeyaml-1.30.jar aspec
+ tjweaver-1.9.7.jar classgraph-4.1.7.jar spring-boot-starter-web-2.7.5.j
+ ar mapstruct-1.3.1.Final.jar spring-security-test-5.7.4.jar reactive-st
+ reams-1.0.4.jar knife4j-spring-2.0.9.jar mybatis-plus-annotation-3.5.1.
+ jar tomcat-embed-el-9.0.68.jar jackson-databind-2.13.4.2.jar lombok-1.1
+ 8.24.jar spring-oxm-5.3.23.jar spring-boot-buildpack-platform-2.7.5.jar
+  spring-context-support-5.3.23.jar jna-platform-5.7.0.jar knife4j-sprin
+ g-boot-autoconfigure-2.0.9.jar
+
