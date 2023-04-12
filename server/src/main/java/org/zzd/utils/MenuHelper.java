@@ -19,7 +19,7 @@ public class MenuHelper {
     public static List<SystemMenu> buildTree(List<SystemMenu> sysMenuList) {
         List<SystemMenu> trees = new ArrayList<>();
         for (SystemMenu systemMenu : sysMenuList) {
-            if (systemMenu.getParentId().longValue() == 0) {
+            if (systemMenu.getParentId() == 0) {
                 trees.add(findChildren(systemMenu,sysMenuList));
             }
         }

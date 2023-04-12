@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,6 +65,8 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     @Resource
     private JwtTokenUtil jwtTokenUtil;
 
+    private final Logger logger = LoggerFactory.getLogger(SystemUserServiceImpl.class);
+
     @Override
     public ResponseResult login(LoginDto loginDto) throws ResponseException {
         SystemUser login = doLogin(loginDto.getUsername(), loginDto.getPassword());
@@ -74,6 +78,7 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
         map.put("expireTime", jwtTokenUtil.getExpiredDateFromToken(token).getTime());
         //token值存入redis
         redisCache.setCacheObject("token_", token);
+        logger.info("登录成功，并将登录状态存入redis");
         return ResponseResult.success("登录成功", map);
     }
 
